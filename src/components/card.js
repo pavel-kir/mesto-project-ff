@@ -1,8 +1,6 @@
-import { cardTemplate } from "../components/index.js";
-
 // @todo: Функция создания карточки
-export function addCard(data, del, like, open) {
-  const card = cardTemplate.querySelector('.card').cloneNode(true);
+export function addCard(data, template, del, like, open) {
+  const card = template.querySelector('.card').cloneNode(true);
   card.querySelector('.card__image').src = data.link;
   card.querySelector('.card__image').alt = data.name;
   card.querySelector('.card__title').textContent = data.name;
