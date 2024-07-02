@@ -1,7 +1,15 @@
+// -------------------------------- Import --------------------------------- //
+
+import '../pages/index.css';
+
+import { initialCards } from "../components/cards";
+import { addCard, removeCard, likeCard } from "../components/card";
+import { openPopup, closePopup } from "../components/modal";
+
 // --------------------------------- ПР5 ----------------------------------- //
 
 // @todo: Темплейт карточки
-const cardTemplate = document.querySelector('#card-template').content;
+export const cardTemplate = document.querySelector('#card-template').content;
 
 // @todo: DOM узлы
 const placesList = document.querySelector('.places__list');
@@ -28,7 +36,7 @@ const imagePopup = document.querySelector('.popup_type_image');
 // ------------------------------ Переменные ------------------------------- //
 
 // переменная для хранения открытого попапа
-let popup;
+export let popup;
 
 // -------------------- Формы и всё что с ними сязано ---------------------- //
 
@@ -60,57 +68,6 @@ const linkInput = formNewPlace.querySelector('[name="link"]');
 
 
 // ------------------------------- Функции --------------------------------- //
-
-// @todo: Функция создания карточки
-function addCard(data, del, like, open) {
-  const card = cardTemplate.querySelector('.card').cloneNode(true);
-  card.querySelector('.card__image').src = data.link;
-  card.querySelector('.card__image').alt = data.name;
-  card.querySelector('.card__title').textContent = data.name;
-  card.querySelector('.card__delete-button').addEventListener('click', del);
-  card.querySelector('.card__like-button').addEventListener('click', like);
-  card.querySelector('.card__image').addEventListener('click', open);
-  return card;
-}
-
-// @todo: Функция удаления карточки
-function removeCard(evt) {
-  const listItem = evt.target.closest('.card');
-  listItem.remove();
-}
-
-// функция Like карточки
-function likeCard (evt) {
-   evt.target.classList.toggle('card__like-button_is-active');
-}
-
-// функция закрытия попапа
-function closePopup() {
-  document.removeEventListener('keydown', closeEscape);
-  popup.removeEventListener('mousedown', closeOverlay);
-  popup.classList.remove('popup_is-opened');
-}
-
-// функция закрытия попапа по нажатию Escape
-function closeEscape (evt) {
-  if (evt.key === 'Escape') {
-    closePopup();
-  }
-}
-
-// функция закрытия попапа по клику на Overlay
-function closeOverlay (evt) {
-  if (evt.target.classList.contains('popup')) {
-    closePopup();  
-  }
-}
-
-// функция открытия попапа
-function openPopup() {
-  document.addEventListener('keydown', closeEscape);
-  popup.addEventListener('mousedown', closeOverlay);
-  popup.classList.add('popup_is-opened');
-}
 
 // функция открытия попапа с картинкой
 function openImage (evt) {
