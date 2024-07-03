@@ -1,24 +1,15 @@
 // функция закрытия попапа по нажатию Escape
 function closeEscape (evt) {
   if (evt.key === 'Escape') {
-    closeModal();
+    closePopup(document.querySelector('.popup_is-opened'));
   }
 }
 
-// функция закрытия попапа по клику на Overlay
+// функция закрытия попапа по клику на Overlay или кнопке X 
 function closeOverlay (evt) {
-  if (evt.target.classList.contains('popup')) {
-    closeModal();  
+  if ((evt.target.classList.contains('popup')) || (evt.target.classList.contains('popup__close'))) {
+    closePopup(evt.target.closest('.popup'));  
   }
-}
-
-// функция закрытия попапа для Escape и Overlay и кнопки Х
-export function closeModal() {
-  const openModal = document.querySelector('.popup_is-opened');
-  document.removeEventListener('keydown', closeEscape);
-  openModal.removeEventListener('mousedown', closeOverlay);
-  openModal.classList.remove('popup_is-opened');
-
 }
 
 // функция закрытия попапа

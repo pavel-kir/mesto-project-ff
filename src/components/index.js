@@ -4,7 +4,7 @@ import '../pages/index.css';
 
 import { initialCards } from "../components/cards";
 import { addCard, removeCard, likeCard } from "../components/card";
-import { openPopup, closePopup, closeModal } from "../components/modal";
+import { openPopup, closePopup } from "../components/modal";
 
 // --------------------------------- ПР5 ----------------------------------- //
 
@@ -114,13 +114,6 @@ editButton.addEventListener('click', function() {
 // обработчик клика по кнопке + (Добавить)
 addButton.addEventListener('click', function() {
   openPopup(addPopup);
-});
-
-// обработчик клика кнопки Закрыть(Х) всех попапов
-document.addEventListener('click', function(evt) {
-  if (evt.target.classList.contains('popup__close')) {
-    closeModal();
-  }
 });
 
 // обработчик кнопки Сохранить, формы "Редактировать профиль"
