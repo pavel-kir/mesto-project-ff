@@ -4,7 +4,7 @@ import '../pages/index.css';
 
 import { initialCards } from "../components/cards";
 import { addCard, removeCard, likeCard } from "../components/card";
-import { openPopup, closePopup } from "../components/modal";
+import { openPopup, closePopup, closeOverlay} from "../components/modal";
 
 // --------------------------------- ПР5 ----------------------------------- //
 
@@ -98,6 +98,11 @@ function submitNewPlace(evt) {
 
 
 // --------------------------------- Code ---------------------------------- //
+
+// добавления обработчика клика на каждый popup
+document.querySelectorAll('.popup').forEach((item) => {
+  item.addEventListener('click', closeOverlay);
+});
 
 // @todo: Вывести карточки на страницу
 initialCards.forEach((item) => {
