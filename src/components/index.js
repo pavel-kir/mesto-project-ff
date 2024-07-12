@@ -5,6 +5,7 @@ import '../pages/index.css';
 import { initialCards } from "../components/cards";
 import { addCard, removeCard, likeCard } from "../components/card";
 import { openPopup, closePopup, closeOverlay} from "../components/modal";
+import { enableValidation, clearValidation } from '../components/validation';
 
 // --------------------------------- ПР5 ----------------------------------- //
 
@@ -61,6 +62,18 @@ const placeInput = formNewPlace.querySelector('[name="place-name"]');
 // поле Ссылка
 const linkInput = formNewPlace.querySelector('[name="link"]');
 
+// ------------------------------ Переменные ------------------------------- //
+
+// Объект настроек для валидации
+const validationConfig = {
+    formSelector: '.popup__form',
+    inputSelector: '.popup__input',
+    submitButtonSelector: '.popup__button',
+    inactiveButtonClass: 'popup__button_disabled',
+    inputErrorClass: 'popup__input_type_error',
+    errorClass: 'popup__error_visible'
+};
+
 
 // ------------------------------- Функции --------------------------------- //
 
@@ -94,6 +107,7 @@ function submitNewPlace(evt) {
   placeInput.value = '';
   linkInput.value = '';
   closePopup(addPopup);
+  clearValidation(formNewPlace, validationConfig);
 }
 
 
@@ -113,6 +127,7 @@ initialCards.forEach((item) => {
 editButton.addEventListener('click', function() {
   nameInput.value = profileTitle.textContent;
   jobInput.value = profileDescription.textContent;
+  clearValidation(formProfile, validationConfig);
   openPopup(editPopup);
 });
 
@@ -126,3 +141,6 @@ formProfile.addEventListener('submit', submitProfile);
 
 //обработчик кнопки Сохранить, формы "Новое место"
 formNewPlace.addEventListener('submit', submitNewPlace);
+
+// включение валидации
+enableValidation(validationConfig); 
