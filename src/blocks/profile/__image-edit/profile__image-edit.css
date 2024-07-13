@@ -1,0 +1,13 @@
+.profile__image-edit {
+  position: absolute;
+  z-index: -1;
+  inset-inline-start: 47px;
+  inset-block-start: 83px;
+  width: 26px;
+  height: 26px;
+  pointer-events: none; 
+}
+
+.profile__image:hover + .profile__image-edit {
+  z-index: 1;
+}

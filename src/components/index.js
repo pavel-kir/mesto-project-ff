@@ -2,10 +2,10 @@
 
 import '../pages/index.css';
 
-import { initialCards } from "../components/cards";
 import { addCard, removeCard, likeCard } from "../components/card";
 import { openPopup, closePopup, closeOverlay} from "../components/modal";
 import { enableValidation, clearValidation } from '../components/validation';
+import { getInitialUser, getInitialCards, patchEditProfile, postNewCard, patchUpdateAvatar, headValidUrl } from '../components/api';
 
 // --------------------------------- ПР5 ----------------------------------- //
 
@@ -23,6 +23,9 @@ const editButton = document.querySelector('.profile__edit-button');
 // кнопка Добавить(+)
 const addButton = document.querySelector('.profile__add-button');
 
+// кнопка Обновить аватар
+const updateButton = document.querySelector('.profile__image');
+
 // -------------------------------- Попапы --------------------------------- //
 
 // попап Редактировать
@@ -34,7 +37,10 @@ const addPopup = document.querySelector('.popup_type_new-card');
 // попап картинки
 const imagePopup = document.querySelector('.popup_type_image');
 
-// -------------------- Формы и всё что с ними сязано ---------------------- //
+// попап Обновить аватар
+const updatePopup = document.querySelector('.popup_type_update-avatar');
+
+// -------------------------------- Формы ---------------------------------- //
 
 // -------------------- Форма "Редактировать профиль" ---------------------- //
 // сама форма
@@ -46,12 +52,6 @@ const nameInput = formProfile.querySelector('[name="name"]');
 // поле Работа 
 const jobInput = formProfile.querySelector('[name="description"]');
 
-// элемент на странице, отображающий Имя
-const profileTitle = document.querySelector('.profile__title');
-
-// элемент на странице, отображающий кем работает человек
-const profileDescription = document.querySelector('.profile__description');
-
 // ------------------------- Форма "Новое место" --------------------------- //
 // сама форма
 const formNewPlace = document.querySelector('[name="new-place"]');
@@ -61,6 +61,14 @@ const placeInput = formNewPlace.querySelector('[name="place-name"]');
 
 // поле Ссылка
 const linkInput = formNewPlace.querySelector('[name="link"]');
+
+// ------------------------Форма "Обновить аватар" ------------------------- //
+
+// сама форма
+const formUpdateAvatar = document.querySelector('[name="update-avatar"]');
+
+// поле Ссылка
+const updateInput = formUpdateAvatar.querySelector('[name="link-update"]');
 
 // ------------------------------ Переменные ------------------------------- //
 
@@ -73,6 +81,15 @@ const validationConfig = {
     inputErrorClass: 'popup__input_type_error',
     errorClass: 'popup__error_visible'
 };
+
+// элемент на странице, отображающий Имя
+const profileTitle = document.querySelector('.profile__title');
+
+// элемент на странице, отображающий кем работает человек
+const profileDescription = document.querySelector('.profile__description');
+
+// элемент на странице, отображающий фото профиля
+const profileImage = document.querySelector('.profile__image');
 
 
 // ------------------------------- Функции --------------------------------- //
@@ -88,26 +105,67 @@ function openImage (evt) {
 // колбэк кнопки Сохранить, формы "Редактировать профиль"
 function submitProfile(evt) {
   evt.preventDefault();
-  profileTitle.textContent = nameInput.value;
-  profileDescription.textContent = jobInput.value;
-  closePopup(editPopup);
-}
+  const saveButton = evt.target.querySelector('.popup__button');
+  saveButton.textContent = 'Сохранение...';
+  
+  patchEditProfile(nameInput.value, jobInput.value)
+    .then((res) => {
+      profileTitle.textContent = res.name;
+      profileDescription.textContent = res.about;
+    })
+
+    .catch(err => console.log(err))
+
+    .finally(() => {
+      saveButton.textContent = 'Сохранить';
+      closePopup(editPopup);
+    });
+  }
 
 // колбэк кнопки Сохранить, формы "Новое место"
 function submitNewPlace(evt) {
   evt.preventDefault();
-  
-  const newObject = {};
-  newObject.name = placeInput.value;
-  newObject.link = linkInput.value;
-  
-  initialCards.unshift(newObject);
-  placesList.prepend(addCard(newObject, cardTemplate, removeCard, likeCard, openImage));
+  const saveButton = evt.target.querySelector('.popup__button');
+  saveButton.textContent = 'Сохранение...';
 
-  placeInput.value = '';
-  linkInput.value = '';
-  closePopup(addPopup);
-  clearValidation(formNewPlace, validationConfig);
+  postNewCard(placeInput.value, linkInput.value)
+    .then((res) => {
+      placesList.prepend(addCard(res, cardTemplate, removeCard, likeCard, openImage));
+    })
+
+    .catch(err => console.log(err))
+
+    .finally(() => {
+      saveButton.textContent = 'Сохранить';
+      placeInput.value = '';
+      linkInput.value = '';
+      closePopup(addPopup);
+      clearValidation(formNewPlace, validationConfig);
+    });
+}
+
+// колбэк кнопки Сохранить, формы "Обновить аватар"
+function submitUpdateAvatar(evt) {
+  evt.preventDefault();
+  const saveButton = evt.target.querySelector('.popup__button');
+  saveButton.textContent = 'Сохранение...';
+
+  headValidUrl(updateInput.value)
+    .then((res) => {
+      if (res.match(/^image/)) {
+        patchUpdateAvatar(updateInput.value)
+          .then((res) => {
+            profileImage.src = res.avatar;
+          })
+          .catch(err => console.log(err))
+
+      } else console.log('URL не прошёл проверку')
+    })
+    .catch(err => console.log(err))
+    .finally(() => {
+      saveButton.textContent = 'Сохранить';
+      closePopup(updatePopup);
+    });
 }
 
 
@@ -116,11 +174,6 @@ function submitNewPlace(evt) {
 // добавления обработчика клика на каждый popup
 document.querySelectorAll('.popup').forEach((item) => {
   item.addEventListener('click', closeOverlay);
-});
-
-// @todo: Вывести карточки на страницу
-initialCards.forEach((item) => {
-  placesList.append(addCard(item, cardTemplate, removeCard, likeCard, openImage));
 });
 
 // обработчик клика по кнопке Редактировать
@@ -136,11 +189,32 @@ addButton.addEventListener('click', function() {
   openPopup(addPopup);
 });
 
+// обработчик клика по изображению аватара
+updateButton.addEventListener('click', function() {
+  openPopup(updatePopup);
+});
+
 // обработчик кнопки Сохранить, формы "Редактировать профиль"
 formProfile.addEventListener('submit', submitProfile);
 
 //обработчик кнопки Сохранить, формы "Новое место"
 formNewPlace.addEventListener('submit', submitNewPlace);
 
+//обработчик кнопки Сохранить, формы "Обновить аватар"
+formUpdateAvatar.addEventListener('submit', submitUpdateAvatar);
+
 // включение валидации
 enableValidation(validationConfig); 
+
+// Промис Инициализация пользователя и Вывод карточек с сервера
+Promise.all([getInitialUser(), getInitialCards()])
+  .then(([resultUser, resultCard]) => {
+    profileTitle.textContent = resultUser.name;
+    profileDescription.textContent = resultUser.about;
+    profileImage.src = resultUser.avatar;
+
+    resultCard.forEach((item) => {
+      placesList.append(addCard(item, cardTemplate, removeCard, likeCard, openImage, resultUser._id));
+    });
+  })
+  .catch(err => console.log(err));
