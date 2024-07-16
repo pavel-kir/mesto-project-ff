@@ -5,7 +5,7 @@ import '../pages/index.css';
 import { addCard, likeCard } from "../components/card";
 import { openPopup, closePopup, closeOverlay} from "../components/modal";
 import { enableValidation, clearValidation } from '../components/validation';
-import { getInitialUser, getInitialCards, patchEditProfile, postNewCard, patchUpdateAvatar, headValidUrl, deleteCard } from '../components/api';
+import { getInitialUser, getInitialCards, patchEditProfile, postNewCard, patchUpdateAvatar, headValidUrl, deleteCard, deleteLike, putLike } from '../components/api';
 
 // --------------------------------- ПР5 ----------------------------------- //
 
@@ -159,7 +159,7 @@ function submitNewPlace(evt) {
 
   postNewCard(placeInput.value, linkInput.value)
     .then((res) => {
-      placesList.prepend(addCard(res, cardTemplate, likeCard, openImage, removeCard, res.owner._id));
+      placesList.prepend(addCard(res, cardTemplate, likeCard, openImage, removeCard, deleteLike, putLike, res.owner._id));
     })
 
     .catch(err => console.log(err))
@@ -246,7 +246,7 @@ Promise.all([getInitialUser(), getInitialCards()])
     profileImage.src = resultUser.avatar;
 
     resultCard.forEach((item) => {
-      placesList.append(addCard(item, cardTemplate, likeCard, openImage, removeCard, resultUser._id));
+      placesList.append(addCard(item, cardTemplate, likeCard, openImage, removeCard, deleteLike, putLike, resultUser._id));
     });
   })
   .catch(err => console.log(err));
