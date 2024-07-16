@@ -1,15 +1,11 @@
-
-import { deleteCard, putLike, deleteLike } from "./api";
+import { putLike, deleteLike } from "./api";
 
 // @todo: Функция создания карточки
-export function addCard(data, template, del, like, open, user_id) {
+export function addCard(data, template, like, open, remove, user_id) {
   const card = template.querySelector('.card').cloneNode(true);
   const deleteButton = card.querySelector('.card__delete-button');
   const likeButton = card.querySelector('.card__like-button');
   const image = card.querySelector('.card__image');
-
-  // id
-  card.id = data._id;
 
   // картинка
   image.src = data.link;
@@ -34,36 +30,26 @@ export function addCard(data, template, del, like, open, user_id) {
   
   // если мы добавляли карточку, устанавливаем кнопку удаления
   if (user_id === data.owner._id) {
-    deleteButton.addEventListener('click', del);
+    deleteButton.addEventListener('click', () => remove(data._id, card));
     deleteButton.classList.add('card__delete-button_visible');
   }
 
   return card;
 }
 
-// @todo: Функция удаления карточки
-export function removeCard(evt) {
-  const listItem = evt.target.closest('.card');
-
-  deleteCard(listItem.id)
-    .then(() => listItem.remove())
-
-    .catch(err => console.log(err));
-}
-
 // функция Like карточки
 export function likeCard (evt) {
-  const listItem = evt.target.closest('.card')
+  const listItem = evt.target.closest('.card');
 
   if (evt.target.classList.contains('card__like-button_is-active')) {
-    deleteLike(listItem.id)
+    deleteLike(listItem.dataset.id)
       .then((res) => {
         listItem.querySelector('.card__like-counter').textContent = res.likes.length;
         evt.target.classList.remove('card__like-button_is-active');
       })
       .catch(err => console.log(err));
   } else {
-    putLike(listItem.id)
+    putLike(listItem.dataset.id)
       .then((res) => {
         listItem.querySelector('.card__like-counter').textContent = res.likes.length;
         evt.target.classList.add('card__like-button_is-active');

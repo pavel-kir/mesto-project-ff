@@ -62,8 +62,9 @@ export const postNewCard = (nameCard, linkCard) => {
     })
   })
   .then((res) => {
-    if (res.ok) return
-
+    if (res.ok) {
+      return res.json();
+    }
     return Promise.reject(`Ошибка: ${res.status}`);
    })
 }
@@ -76,7 +77,7 @@ export const deleteCard = (cardId) => {
   })
   .then((res) => {
     if (res.ok) {
-      return res.json();
+      return
     }
     return Promise.reject(`Ошибка: ${res.status}`);
    })

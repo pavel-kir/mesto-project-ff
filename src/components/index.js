@@ -2,10 +2,10 @@
 
 import '../pages/index.css';
 
-import { addCard, removeCard, likeCard } from "../components/card";
+import { addCard, likeCard } from "../components/card";
 import { openPopup, closePopup, closeOverlay} from "../components/modal";
 import { enableValidation, clearValidation } from '../components/validation';
-import { getInitialUser, getInitialCards, patchEditProfile, postNewCard, patchUpdateAvatar, headValidUrl } from '../components/api';
+import { getInitialUser, getInitialCards, patchEditProfile, postNewCard, patchUpdateAvatar, headValidUrl, deleteCard } from '../components/api';
 
 // --------------------------------- ПР5 ----------------------------------- //
 
@@ -40,11 +40,14 @@ const imagePopup = document.querySelector('.popup_type_image');
 // попап Обновить аватар
 const updatePopup = document.querySelector('.popup_type_update-avatar');
 
+// попап Подтверждения удаления
+const deletePopup = document.querySelector('.popup_type_question-delete');
+
 // -------------------------------- Формы ---------------------------------- //
 
 // -------------------- Форма "Редактировать профиль" ---------------------- //
 // сама форма
-const formProfile = document.querySelector('[name="edit-profile"]');
+const formProfile = editPopup.querySelector('.popup__form');
 
 // поле Имя
 const nameInput = formProfile.querySelector('[name="name"]');
@@ -52,9 +55,10 @@ const nameInput = formProfile.querySelector('[name="name"]');
 // поле Работа 
 const jobInput = formProfile.querySelector('[name="description"]');
 
+
 // ------------------------- Форма "Новое место" --------------------------- //
 // сама форма
-const formNewPlace = document.querySelector('[name="new-place"]');
+const formNewPlace = addPopup.querySelector('.popup__form');
 
 // поле Название
 const placeInput = formNewPlace.querySelector('[name="place-name"]');
@@ -65,10 +69,13 @@ const linkInput = formNewPlace.querySelector('[name="link"]');
 // ------------------------Форма "Обновить аватар" ------------------------- //
 
 // сама форма
-const formUpdateAvatar = document.querySelector('[name="update-avatar"]');
+const formUpdateAvatar = updatePopup.querySelector('.popup__form');
 
 // поле Ссылка
 const updateInput = formUpdateAvatar.querySelector('[name="link-update"]');
+
+// -------------------- Форма "Подтверждение удаления" --------------------- //
+const formQestion = deletePopup.querySelector('.popup__form');
 
 // ------------------------------ Переменные ------------------------------- //
 
@@ -91,6 +98,12 @@ const profileDescription = document.querySelector('.profile__description');
 // элемент на странице, отображающий фото профиля
 const profileImage = document.querySelector('.profile__image');
 
+// переменная для хранения id карточки
+let  id;
+
+// переменная для хранения удаляемой карточки
+let card;
+
 
 // ------------------------------- Функции --------------------------------- //
 
@@ -100,6 +113,22 @@ function openImage (evt) {
   imagePopup.querySelector('.popup__image').alt = evt.target.alt;
   imagePopup.querySelector('.popup__caption').textContent = evt.target.alt;
   openPopup(imagePopup);
+}
+
+// функция удаления карточки
+function removeCard(cardId, deletion) {
+  id = cardId;
+  card = deletion;
+  openPopup(deletePopup);
+}
+
+// Колбэк кнопки Да, формы "Подтверждение удаления"
+function submitQestion (evt) {
+  evt.preventDefault(); 
+  deleteCard(id)
+    .then(() => card.remove())
+    .catch(err => console.log(err))
+    .finally(() => closePopup(deletePopup));
 }
 
 // колбэк кнопки Сохранить, формы "Редактировать профиль"
@@ -130,7 +159,7 @@ function submitNewPlace(evt) {
 
   postNewCard(placeInput.value, linkInput.value)
     .then((res) => {
-      placesList.prepend(addCard(res, cardTemplate, removeCard, likeCard, openImage));
+      placesList.prepend(addCard(res, cardTemplate, likeCard, openImage, removeCard, res.owner._id));
     })
 
     .catch(err => console.log(err))
@@ -203,6 +232,9 @@ formNewPlace.addEventListener('submit', submitNewPlace);
 //обработчик кнопки Сохранить, формы "Обновить аватар"
 formUpdateAvatar.addEventListener('submit', submitUpdateAvatar);
 
+// обработчик кнопки Да, формы "Подтверждение удаления"
+formQestion.addEventListener('submit', submitQestion);
+
 // включение валидации
 enableValidation(validationConfig); 
 
@@ -214,7 +246,7 @@ Promise.all([getInitialUser(), getInitialCards()])
     profileImage.src = resultUser.avatar;
 
     resultCard.forEach((item) => {
-      placesList.append(addCard(item, cardTemplate, removeCard, likeCard, openImage, resultUser._id));
+      placesList.append(addCard(item, cardTemplate, likeCard, openImage, removeCard, resultUser._id));
     });
   })
   .catch(err => console.log(err));
