@@ -37,6 +37,12 @@ const addPopup = document.querySelector('.popup_type_new-card');
 // попап картинки
 const imagePopup = document.querySelector('.popup_type_image');
 
+// картинка попапа
+const image = imagePopup.querySelector('.popup__image');
+
+// описание картинка
+const caption = imagePopup.querySelector('.popup__caption');
+
 // попап Обновить аватар
 const updatePopup = document.querySelector('.popup_type_update-avatar');
 
@@ -75,6 +81,7 @@ const formUpdateAvatar = updatePopup.querySelector('.popup__form');
 const updateInput = formUpdateAvatar.querySelector('[name="link-update"]');
 
 // -------------------- Форма "Подтверждение удаления" --------------------- //
+
 const formQestion = deletePopup.querySelector('.popup__form');
 
 // ------------------------------ Переменные ------------------------------- //
@@ -109,9 +116,9 @@ let card;
 
 // функция открытия попапа с картинкой
 function openImage (evt) {
-  imagePopup.querySelector('.popup__image').src = evt.target.src;
-  imagePopup.querySelector('.popup__image').alt = evt.target.alt;
-  imagePopup.querySelector('.popup__caption').textContent = evt.target.alt;
+  image.src = evt.target.src;
+  image.alt = evt.target.alt;
+  caption.textContent = evt.target.alt;
   openPopup(imagePopup);
 }
 
@@ -126,9 +133,11 @@ function removeCard(cardId, deletion) {
 function submitQestion (evt) {
   evt.preventDefault(); 
   deleteCard(id)
-    .then(() => card.remove())
+    .then(() => {
+      card.remove();
+      closePopup(deletePopup);
+    })
     .catch(err => console.log(err))
-    .finally(() => closePopup(deletePopup));
 }
 
 // колбэк кнопки Сохранить, формы "Редактировать профиль"
@@ -141,14 +150,10 @@ function submitProfile(evt) {
     .then((res) => {
       profileTitle.textContent = res.name;
       profileDescription.textContent = res.about;
-    })
-
-    .catch(err => console.log(err))
-
-    .finally(() => {
       saveButton.textContent = 'Сохранить';
       closePopup(editPopup);
-    });
+    })
+    .catch(err => console.log(err))
   }
 
 // колбэк кнопки Сохранить, формы "Новое место"
@@ -160,17 +165,13 @@ function submitNewPlace(evt) {
   postNewCard(placeInput.value, linkInput.value)
     .then((res) => {
       placesList.prepend(addCard(res, cardTemplate, likeCard, openImage, removeCard, deleteLike, putLike, res.owner._id));
-    })
-
-    .catch(err => console.log(err))
-
-    .finally(() => {
       saveButton.textContent = 'Сохранить';
       placeInput.value = '';
       linkInput.value = '';
       closePopup(addPopup);
       clearValidation(formNewPlace, validationConfig);
-    });
+    })
+    .catch(err => console.log(err))
 }
 
 // колбэк кнопки Сохранить, формы "Обновить аватар"
@@ -185,16 +186,14 @@ function submitUpdateAvatar(evt) {
         patchUpdateAvatar(updateInput.value)
           .then((res) => {
             profileImage.src = res.avatar;
+            saveButton.textContent = 'Сохранить';
+            closePopup(updatePopup);
           })
           .catch(err => console.log(err))
 
       } else console.log('URL не прошёл проверку')
     })
     .catch(err => console.log(err))
-    .finally(() => {
-      saveButton.textContent = 'Сохранить';
-      closePopup(updatePopup);
-    });
 }
 
 
