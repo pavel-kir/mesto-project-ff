@@ -150,10 +150,10 @@ function submitProfile(evt) {
     .then((res) => {
       profileTitle.textContent = res.name;
       profileDescription.textContent = res.about;
-      saveButton.textContent = 'Сохранить';
       closePopup(editPopup);
     })
     .catch(err => console.log(err))
+    .finally(() => saveButton.textContent = 'Сохранить')
   }
 
 // колбэк кнопки Сохранить, формы "Новое место"
@@ -165,13 +165,13 @@ function submitNewPlace(evt) {
   postNewCard(placeInput.value, linkInput.value)
     .then((res) => {
       placesList.prepend(addCard(res, cardTemplate, likeCard, openImage, removeCard, deleteLike, putLike, res.owner._id));
-      saveButton.textContent = 'Сохранить';
       placeInput.value = '';
       linkInput.value = '';
       closePopup(addPopup);
       clearValidation(formNewPlace, validationConfig);
     })
     .catch(err => console.log(err))
+    .finally(() => saveButton.textContent = 'Сохранить')
 }
 
 // колбэк кнопки Сохранить, формы "Обновить аватар"
@@ -186,7 +186,6 @@ function submitUpdateAvatar(evt) {
         patchUpdateAvatar(updateInput.value)
           .then((res) => {
             profileImage.src = res.avatar;
-            saveButton.textContent = 'Сохранить';
             closePopup(updatePopup);
           })
           .catch(err => console.log(err))
@@ -194,6 +193,7 @@ function submitUpdateAvatar(evt) {
       } else console.log('URL не прошёл проверку')
     })
     .catch(err => console.log(err))
+    .finally(() => saveButton.textContent = 'Сохранить')
 }
 
 
